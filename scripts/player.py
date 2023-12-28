@@ -51,42 +51,44 @@ class Player(pygame.sprite.Sprite):
     
     # Detecting input from user for movement
     def input(self):
-        # Getting input
-        keys = pygame.key.get_pressed()
-        
-        # Adjusting direction based on input for movement
-        if keys[pygame.K_w]:
-            self.direction.y = -1
-            self.action_status = "up"
-        elif keys[pygame.K_s]:
-            self.direction.y = 1
-            self.action_status = "down"
-        else:
-            self.direction.y = 0
-        
-        if keys[pygame.K_a]:
-            self.direction.x = -1
-            self.action_status = "left"
-        elif keys[pygame.K_d]:
-            self.direction.x = 1
-            self.action_status = "right"
-        else:
-            self.direction.x = 0
+        # Make sure player cannot move during attack action
+        if not self.attacking:
+            # Getting input
+            keys = pygame.key.get_pressed()
+            
+            # Adjusting direction based on input for movement
+            if keys[pygame.K_w]:
+                self.direction.y = -1
+                self.action_status = "up"
+            elif keys[pygame.K_s]:
+                self.direction.y = 1
+                self.action_status = "down"
+            else:
+                self.direction.y = 0
+            
+            if keys[pygame.K_a]:
+                self.direction.x = -1
+                self.action_status = "left"
+            elif keys[pygame.K_d]:
+                self.direction.x = 1
+                self.action_status = "right"
+            else:
+                self.direction.x = 0
 
-        # Attack input
-        if keys[pygame.K_SPACE] and not self.attacking and not self.holding:
-            # Set attack cooldown
-            self.attacking = True
-            self.time_attacked = pygame.time.get_ticks()
-        
-        # Holding objects
-        if keys[pygame.K_e] and not self.holding:
-            # Set holding cooldown
-            self.holding = True
-        
-        # Drop held object
-        if keys[pygame.K_q] and self.holding:
-            self.holding = False
+            # Attack input
+            if keys[pygame.K_SPACE] and not self.attacking and not self.holding:
+                # Set attack cooldown
+                self.attacking = True
+                self.time_attacked = pygame.time.get_ticks()
+            
+            # Holding objects
+            if keys[pygame.K_e] and not self.holding:
+                # Set holding cooldown
+                self.holding = True
+            
+            # Drop held object
+            if keys[pygame.K_q] and self.holding:
+                self.holding = False
     
     # Figure out which action the player is doing and change status
     def get_status(self):
@@ -103,12 +105,14 @@ class Player(pygame.sprite.Sprite):
             if not "attack" in self.action_status: # Check if not already attacking
                 # Overwrite status if necessary
                 if "idle" in self.action_status:
-                    self.action_status.replace("_idle", "_attack")
+                    print("yes")
+                    self.action_status = self.action_status.replace("_idle", "_attack")
                 else:
                     self.action_status += "_attack"
-            else: # Remove attack animation after cooldown and make status idle
-                if "attack" in self.action_status:
-                    self.action_status.replace("_attack", "")
+                    
+        else: # Remove attack animation after cooldown and make status idle
+            if "attack" in self.action_status:
+                self.action_status = self.action_status.replace("_attack","")
     
     def move(self, speed):
         # Prevent player from moving faster diagonally (because a^2+b^2=c^2)
