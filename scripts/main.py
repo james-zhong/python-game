@@ -12,7 +12,7 @@ class Game:
 
 		# Game setup
 		self.level = Level()
-	
+
 	def run(self):
 		while True:
 			# Get user input
