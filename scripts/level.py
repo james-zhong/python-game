@@ -23,7 +23,8 @@ class Level:
         layouts = {
             "boundary": import_csv_layout("graphics/csv_maps/boundary.csv"),
             "grass": import_csv_layout("graphics/csv_maps/grass.csv"),
-            "objects": import_csv_layout("graphics/csv_maps/objects.csv")
+            "objects": import_csv_layout("graphics/csv_maps/objects.csv"),
+            "trees_regen": import_csv_layout("graphics/csv_maps/trees_regen.csv")
         }
         
         graphics = {
@@ -49,7 +50,7 @@ class Level:
                             Tile((x,y), [self.visible_sprites, self.obstacle_sprites], "grass", random_grass_image)
 
                         # Place objects specifically based on CSV file
-                        if style == "objects":
+                        if style == "objects" or style == "trees_regen":
                             surface = graphics["objects"][int(col)]
                             Tile((x,y), [self.visible_sprites, self.obstacle_sprites], "object", surface)
                             
