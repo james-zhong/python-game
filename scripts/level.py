@@ -4,6 +4,7 @@ from tile import Tile
 from player import Player
 from support import *
 from random import choice
+from tool import Tool
 
 class Level:
     def __init__(self):
@@ -13,6 +14,9 @@ class Level:
         # Sprite groups
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
+        
+        # Attack sprites
+        self.current_attack = None
         
         # Draw map
         self.create_map()
@@ -53,8 +57,18 @@ class Level:
                         if style == "objects" or style == "trees_regen":
                             surface = graphics["objects"][int(col)]
                             Tile((x,y), [self.visible_sprites, self.obstacle_sprites], "object", surface)
-                            
-        self.player = Player((4992,4864),[self.visible_sprites],self.obstacle_sprites)
+        
+        self.player = Player(SPAWN,[self.visible_sprites],self.obstacle_sprites, self.create_attack, self.destroy_attack)
+    
+    # Create tools when player attacks
+    def create_attack(self):
+        self.current_attack = Tool(self.player, [self.visible_sprites])
+    
+    # Destroy tool when player attack finishes
+    def destroy_attack(self):
+        if self.current_attack:
+            self.current_attack.kill()
+        self.current_attack = None
     
     # Draw the sprites
     def run(self):
@@ -73,7 +87,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         # Create the floor
         self.floor_surface = pygame.image.load("graphics/tilemap/ground.png").convert()
         self.floor_rect = self.floor_surface.get_rect(topleft = (0,0))
-    
+
     # Draw the sprites on an offset so the map moves instead of the player
     def custom_draw(self, player):
         # Get offset

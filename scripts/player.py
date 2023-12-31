@@ -3,12 +3,13 @@ from settings import *
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, position, groups, obstacle_sprites):
+    def __init__(self, position, groups, obstacle_sprites, create_attack, destroy_attack):
         super().__init__(groups)
+        self.obstacle_sprites = obstacle_sprites
         # Player asset
-        self.image = pygame.image.load("graphics/test/player.png").convert_alpha()
+        self.image = pygame.image.load("graphics/entities/player.png").convert_alpha()
         self.rect = self.image.get_rect(topleft = position)
-        # Custom collison so player can go "behind" rocks
+        # Custom collison so player can go "behind" tiles
         self.hitbox = self.rect.inflate(-10, -26)
         
         # Movement
@@ -24,12 +25,16 @@ class Player(pygame.sprite.Sprite):
         self.action_status = "down"
         self.frame_index = 0
         self.animation_speed = 0.15
-
-        self.obstacle_sprites = obstacle_sprites
+        
+        # Player tool
+        self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
+        self.tool_index = 0
+        self.tool = list(tool_data.keys())[self.tool_index]
     
     # Get the player animation sprites/frames
     def import_player_animations(self):
-        character_path = "graphics/player/"
+        character_path = "graphics/player_animations/"
         self.animation_states = {
             "up": [],
             "down": [],
@@ -80,6 +85,7 @@ class Player(pygame.sprite.Sprite):
                 # Set attack cooldown
                 self.attacking = True
                 self.time_attacked = pygame.time.get_ticks()
+                self.create_attack()
             
             # Holding objects
             if keys[pygame.K_e] and not self.holding:
@@ -105,7 +111,6 @@ class Player(pygame.sprite.Sprite):
             if not "attack" in self.action_status: # Check if not already attacking
                 # Overwrite status if necessary
                 if "idle" in self.action_status:
-                    print("yes")
                     self.action_status = self.action_status.replace("_idle", "_attack")
                 else:
                     self.action_status += "_attack"
@@ -114,6 +119,7 @@ class Player(pygame.sprite.Sprite):
             if "attack" in self.action_status:
                 self.action_status = self.action_status.replace("_attack","")
     
+    # Handle player movement and collisions
     def move(self, speed):
         # Prevent player from moving faster diagonally (because a^2+b^2=c^2)
         if self.direction.magnitude() != 0:
@@ -156,6 +162,7 @@ class Player(pygame.sprite.Sprite):
         if self.attacking:
             if current_time - self.time_attacked >= self.attack_cooldown:
                 self.attacking = False
+                self.destroy_attack()
     
     # Animate the player movement
     def animate(self):
